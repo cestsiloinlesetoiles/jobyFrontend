@@ -1,0 +1,83 @@
+/* About page specific styling */
+
+/* Header styling */
+header {
+  margin-bottom: 3rem;
+}
+
+header h1 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+/* Section styling */
+section {
+  margin-bottom: 4rem;
+}
+
+section h2 {
+  color: #444;
+  margin-bottom: 1.5rem;
+}
+
+/* Card styling */
+.card {
+  transition: transform 0.3s ease;
+  margin-bottom: 1.5rem;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Team section */
+.rounded-circle {
+  border: 5px solid #f8f9fa;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Mission icons */
+.bi {
+  color: #0d6efd;
+}
+
+/* Make images responsive */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Spacing refinements */
+.py-5 {
+  padding-top: 3rem !important;
+  padding-bottom: 3rem !important;
+}
+
+/* Contact section button */
+.btn-primary {
+  padding: 0.5rem 2rem;
+  border-radius: 50px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .py-5 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
+
+  section {
+    margin-bottom: 2.5rem;
+  }
+}

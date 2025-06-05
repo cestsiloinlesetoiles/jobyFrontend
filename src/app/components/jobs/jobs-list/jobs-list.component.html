@@ -1,0 +1,21 @@
+<div class="jobs-list">
+  <ng-container *ngIf="jobs.length > 0; else noJobs">
+    <div class="mb-3">
+      <span class="total-jobs">{{ jobs.length }} jobs found</span>
+    </div>
+
+    <div class="jobs-container">
+      <app-job-card *ngFor="let job of jobs" [job]="job"></app-job-card>
+    </div>
+  </ng-container>
+
+  <ng-template #noJobs>
+    <div class="no-jobs-found">
+      <div class="no-jobs-icon">
+        <i class="bi bi-search"></i>
+      </div>
+      <h3>No jobs found</h3>
+      <p>Try adjusting your search filters or check back later for new opportunities.</p>
+    </div>
+  </ng-template>
+</div>

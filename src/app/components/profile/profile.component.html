@@ -1,0 +1,486 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <h2 class="mb-0">My Profile</h2>
+            <span class="badge ms-3" [ngClass]="{
+              'bg-primary': user.role === UserRole.USER,
+              'bg-success': user.role === UserRole.RECRUITER,
+              'bg-danger': user.role === UserRole.ADMIN
+            }">
+              {{ user.role }}
+            </span>
+          </div>
+          <button (click)="toggleEdit()" class="btn" [ngClass]="isEditing ? 'btn-danger' : 'btn-primary'">
+            {{ isEditing ? 'Cancel' : 'Edit' }}
+          </button>
+        </div>
+
+        <div class="card-body">
+          <!-- Loading state -->
+          <div *ngIf="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <!-- Error message -->
+          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ errorMessage }}
+            <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+          </div>
+
+          <!-- Profile pour CHERCHEUR D'EMPLOI (USER) -->
+          <div *ngIf="user.role === UserRole.USER && !isLoading">
+            <!-- View mode -->
+            <div *ngIf="!isEditing" class="profile-view">
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <h4><i class="bi bi-person-fill me-2"></i>Personal Information</h4>
+                  <table class="table">
+                    <tr>
+                      <th>Last Name</th>
+                      <td>{{ user.lastName }}</td>
+                    </tr>
+                    <tr>
+                      <th>First Name</th>
+                      <td>{{ user.firstName }}</td>
+                    </tr>
+                    <tr>
+                      <th>Email</th>
+                      <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                      <th>Phone</th>
+                      <td>{{ user.phoneNumber || 'Not specified' }}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div class="col-md-6">
+                  <h4><i class="bi bi-tools me-2"></i>Skills</h4>
+                  <div class="skills-container">
+                    <span *ngFor="let skill of user.skills" class="badge bg-primary me-2 mb-2">{{ skill }}</span>
+                    <p *ngIf="!user.skills || user.skills.length === 0" class="text-muted">No skills added yet</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <h4><i class="bi bi-briefcase-fill me-2"></i>Work Experience</h4>
+                  <div *ngFor="let exp of user.workExperiences" class="card mb-3">
+                    <div class="card-body">
+                      <h5>{{ exp.jobTitle }} at {{ exp.companyName }}</h5>
+                      <p class="text-muted">{{ exp.startDate }} - {{ exp.endDate || 'Present' }}</p>
+                      <p>{{ exp.description }}</p>
+                    </div>
+                  </div>
+                  <p *ngIf="!user.workExperiences || user.workExperiences.length === 0" class="text-muted">No work experience added yet</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Edit mode pour USER -->
+            <form *ngIf="isEditing" [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <h4><i class="bi bi-person-fill me-2"></i>Personal Information</h4>
+
+                  <div class="mb-3">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="firstName" formControlName="firstName">
+                    <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" class="text-danger">
+                      First name is required
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastName" formControlName="lastName">
+                    <div *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched" class="text-danger">
+                      Last name is required
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" formControlName="email">
+                    <div *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" class="text-danger">
+                      Invalid email
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="phoneNumber" class="form-label">Phone</label>
+                    <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <h4><i class="bi bi-tools me-2"></i>Skills</h4>
+                  <div formArrayName="skills">
+                    <div class="mb-2" *ngFor="let skill of skills.controls; let i = index">
+                      <div class="input-group">
+                        <input type="text" class="form-control" [formControlName]="i">
+                        <button type="button" class="btn btn-danger" (click)="removeSkill(i)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="addSkill()">
+                      <i class="bi bi-plus-circle"></i> Add a skill
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <h4><i class="bi bi-briefcase-fill me-2"></i>Work Experience</h4>
+                  <div formArrayName="workExperiences">
+                    <div *ngFor="let workExp of workExperiences.controls; let i = index" [formGroupName]="i" class="card mb-3">
+                      <div class="card-body">
+                        <div class="mb-3">
+                          <label class="form-label">Job Title</label>
+                          <input type="text" class="form-control" formControlName="jobTitle">
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label">Company</label>
+                          <input type="text" class="form-control" formControlName="companyName">
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label">Description</label>
+                          <textarea class="form-control" formControlName="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-6 mb-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-control" formControlName="startDate">
+                          </div>
+
+                          <div class="col-md-6 mb-3">
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-control" formControlName="endDate">
+                          </div>
+                        </div>
+
+                        <button type="button" class="btn btn-danger btn-sm" (click)="removeWorkExperience(i)">
+                          Delete this experience
+                        </button>
+                      </div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary mb-4" (click)="addWorkExperience()">
+                      <i class="bi bi-plus-circle"></i> Add work experience
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-secondary me-2" (click)="toggleEdit()">Cancel</button>
+                <button type="submit" class="btn btn-success" [disabled]="profileForm.invalid">Save</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Profile pour RECRUITER -->
+          <div *ngIf="user.role === UserRole.RECRUITER && !isLoading">
+            <!-- View mode -->
+            <div *ngIf="!isEditing" class="profile-view">
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <h4><i class="bi bi-building me-2"></i>Recruiter Information</h4>
+                  <table class="table">
+                    <tr>
+                      <th>Last Name</th>
+                      <td>{{ user.lastName }}</td>
+                    </tr>
+                    <tr>
+                      <th>First Name</th>
+                      <td>{{ user.firstName }}</td>
+                    </tr>
+                    <tr>
+                      <th>Email</th>
+                      <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                      <th>Phone</th>
+                      <td>{{ user.phoneNumber || 'Not specified' }}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div class="col-md-6">
+                  <h4 class="d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-graph-up me-2"></i>Recruitment Statistics</span>
+                    <button 
+                      class="btn btn-sm btn-outline-secondary" 
+                      (click)="loadRecruiterData()" 
+                      [disabled]="isLoadingStats"
+                      title="Refresh statistics">
+                      <i class="bi bi-arrow-clockwise" [ngClass]="{'refreshing': isLoadingStats}"></i>
+                    </button>
+                  </h4>
+                  <div class="stats-container">
+                    <div class="stat-card">
+                      <i class="bi bi-file-earmark-text-fill"></i>
+                      <h3>{{ activeJobsCount }}</h3>
+                      <p>Active Jobs</p>
+                    </div>
+                    <div class="stat-card">
+                      <i class="bi bi-people-fill"></i>
+                      <h3 *ngIf="totalApplications !== null; else loadingApplications">{{ totalApplications }}</h3>
+                      <ng-template #loadingApplications>
+                        <div class="spinner-border spinner-border-sm text-success" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                      </ng-template>
+                      <p>Total Applications</p>
+                    </div>
+                    <div class="stat-card">
+                      <i class="bi bi-archive-fill"></i>
+                      <h3>{{ recruiterJobs.length }}</h3>
+                      <p>Total Jobs Posted</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <h4><i class="bi bi-list-task me-2"></i>Recent Job Postings</h4>
+                  <div class="table-responsive">
+                    <table class="table table-hover" *ngIf="recruiterJobs.length > 0">
+                      <thead>
+                        <tr>
+                          <th>Job Title</th>
+                          <th>Location</th>
+                          <th>Applications</th>
+                          <th>Active</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let job of recruiterJobs.slice(0, 5)">
+                          <td>{{ job.title }}</td>
+                          <td>{{ job.location }}</td>
+                          <td>
+                            <span *ngIf="job.applicationCount !== undefined; else loadingCount">
+                              {{ job.applicationCount || 0 }}
+                            </span>
+                            <ng-template #loadingCount>
+                              <div class="spinner-border spinner-border-sm text-secondary" role="status" style="width: 1rem; height: 1rem;">
+                                <span class="visually-hidden">Loading...</span>
+                              </div>
+                            </ng-template>
+                          </td>
+                          <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                              <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                role="switch"
+                                [checked]="job.isActive"
+                                [id]="'jobSwitch' + job.id"
+                                (change)="toggleJobStatus(job)">
+                              <label 
+                                class="form-check-label ms-2" 
+                                [for]="'jobSwitch' + job.id"
+                                [ngClass]="job.isActive ? 'text-success' : 'text-secondary'">
+                                {{ job.isActive ? 'Active' : 'Inactive' }}
+                              </label>
+                            </div>
+                          </td>
+                          <td>
+                            <a [routerLink]="['/edit-job', job.id]" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a [routerLink]="['/job-applications', job.id]" class="btn btn-sm btn-outline-info">View Applications</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <p *ngIf="recruiterJobs.length === 0" class="text-muted">No jobs posted yet</p>
+                  </div>
+                  <div class="text-center mt-3">
+                    <a routerLink="/manage-jobs" class="btn btn-primary">Manage All Jobs</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Edit mode pour RECRUITER -->
+            <form *ngIf="isEditing" [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+              <div class="row mb-4">
+                <div class="col-md-12">
+                  <h4><i class="bi bi-building me-2"></i>Recruiter Information</h4>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="firstName" class="form-label">First Name</label>
+                      <input type="text" class="form-control" id="firstName" formControlName="firstName">
+                      <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" class="text-danger">
+                        First name is required
+                      </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <label for="lastName" class="form-label">Last Name</label>
+                      <input type="text" class="form-control" id="lastName" formControlName="lastName">
+                      <div *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched" class="text-danger">
+                        Last name is required
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="email" class="form-label">Email</label>
+                      <input type="email" class="form-control" id="email" formControlName="email">
+                      <div *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" class="text-danger">
+                        Invalid email
+                      </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <label for="phoneNumber" class="form-label">Phone</label>
+                      <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-secondary me-2" (click)="toggleEdit()">Cancel</button>
+                <button type="submit" class="btn btn-success" [disabled]="profileForm.invalid">Save</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Profile pour ADMIN -->
+          <div *ngIf="user.role === UserRole.ADMIN && !isLoading">
+            <!-- View mode -->
+            <div *ngIf="!isEditing" class="profile-view">
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <h4><i class="bi bi-shield-fill-check me-2"></i>Administrator Information</h4>
+                  <table class="table">
+                    <tr>
+                      <th>Last Name</th>
+                      <td>{{ user.lastName }}</td>
+                    </tr>
+                    <tr>
+                      <th>First Name</th>
+                      <td>{{ user.firstName }}</td>
+                    </tr>
+                    <tr>
+                      <th>Email</th>
+                      <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                      <th>Phone</th>
+                      <td>{{ user.phoneNumber || 'Not specified' }}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div class="col-md-6">
+                  <h4><i class="bi bi-speedometer2 me-2"></i>System Overview</h4>
+                  <div class="stats-container">
+                    <div class="stat-card stat-card-admin">
+                      <i class="bi bi-people-fill"></i>
+                      <h3>{{ totalUsers }}</h3>
+                      <p>Total Users</p>
+                    </div>
+                    <div class="stat-card stat-card-admin">
+                      <i class="bi bi-briefcase-fill"></i>
+                      <h3>{{ totalJobs }}</h3>
+                      <p>Total Jobs</p>
+                    </div>
+                    <div class="stat-card stat-card-admin">
+                      <i class="bi bi-building"></i>
+                      <h3>{{ totalRecruiters }}</h3>
+                      <p>Total Recruiters</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <h4><i class="bi bi-gear-fill me-2"></i>Quick Actions</h4>
+                  <div class="admin-actions">
+                    <button class="btn btn-primary me-2 mb-2">
+                      <i class="bi bi-person-plus-fill me-1"></i> Manage Users
+                    </button>
+                    <button class="btn btn-success me-2 mb-2">
+                      <i class="bi bi-briefcase-fill me-1"></i> Manage Jobs
+                    </button>
+                    <button class="btn btn-info me-2 mb-2">
+                      <i class="bi bi-graph-up me-1"></i> View Reports
+                    </button>
+                    <button class="btn btn-warning mb-2">
+                      <i class="bi bi-gear-fill me-1"></i> System Settings
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Edit mode pour ADMIN -->
+            <form *ngIf="isEditing" [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+              <div class="row mb-4">
+                <div class="col-md-12">
+                  <h4><i class="bi bi-shield-fill-check me-2"></i>Administrator Information</h4>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="firstName" class="form-label">First Name</label>
+                      <input type="text" class="form-control" id="firstName" formControlName="firstName">
+                      <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" class="text-danger">
+                        First name is required
+                      </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <label for="lastName" class="form-label">Last Name</label>
+                      <input type="text" class="form-control" id="lastName" formControlName="lastName">
+                      <div *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched" class="text-danger">
+                        Last name is required
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="email" class="form-label">Email</label>
+                      <input type="email" class="form-control" id="email" formControlName="email">
+                      <div *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" class="text-danger">
+                        Invalid email
+                      </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <label for="phoneNumber" class="form-label">Phone</label>
+                      <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-secondary me-2" (click)="toggleEdit()">Cancel</button>
+                <button type="submit" class="btn btn-success" [disabled]="profileForm.invalid">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

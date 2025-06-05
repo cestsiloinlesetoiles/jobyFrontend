@@ -1,0 +1,38 @@
+<div class="container mt-4" *ngIf="job">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card application-card">
+        <div class="card-body">
+          <div class="job-header mb-4">
+            <h2>Apply for {{ job.title }}</h2>
+            <p class="company-name">{{ job.companyName }}</p>
+            <p class="job-location">
+              <i class="bi bi-geo-alt"></i> {{ job.location }}
+            </p>
+          </div>
+
+          <div class="application-form">
+            <h4 class="mb-3">Cover Letter</h4>
+            <p class="text-muted mb-3">
+              Explain why you're a good fit for this position and what makes you stand out.
+            </p>
+
+            <div class="form-group mb-3">
+              <textarea
+                class="form-control"
+                rows="10"
+                [(ngModel)]="coverLetter"
+                placeholder="Write your cover letter here..."
+              ></textarea>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between">
+              <button class="btn btn-outline-secondary" [routerLink]="['/jobs']">Cancel</button>
+              <button class="btn btn-primary" (click)="onSubmit()">Submit Application</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

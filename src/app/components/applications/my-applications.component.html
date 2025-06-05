@@ -1,0 +1,40 @@
+<div class="applications-container">
+  <div class="applications-header">
+    <h2>My Applications</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-indicator">
+    <div class="spinner"></div>
+    <p>Loading your applications...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && applications.length === 0" class="no-applications">
+    <p>You haven't applied to any jobs yet.</p>
+    <a routerLink="/jobs" class="browse-jobs-btn">Browse Jobs</a>
+  </div>
+
+  <div *ngIf="!isLoading && applications.length > 0" class="applications-list">
+    <div *ngFor="let application of applications" class="application-card">
+      <div class="application-header">
+        <h3>{{ application.jobTitle || application.job?.title || 'Unspecified Position' }}</h3>
+        <span class="application-status" [ngClass]="getStatusClass(application.status)">
+          {{ application.status }}
+        </span>
+      </div>
+
+      <div class="application-details">
+        <p><strong>Company:</strong> {{ application.companyName || application.job?.companyName || 'Not specified' }}</p>
+        <p><strong>Application Date:</strong> Not specified</p>
+        <p *ngIf="application.job?.location"><strong>Location:</strong> {{ application.job?.location }}</p>
+        <p *ngIf="application.job?.jobType"><strong>Job Type:</strong> {{ application.job?.jobType }}</p>
+        <p *ngIf="application.job?.salaryMin && application.job?.salaryMax">
+          <strong>Salary Range:</strong> {{ application.job?.salaryMin }}€ - {{ application.job?.salaryMax }}€
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

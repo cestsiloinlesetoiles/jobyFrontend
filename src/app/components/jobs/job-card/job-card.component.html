@@ -1,0 +1,47 @@
+<div class="job-card">
+  <div class="job-card-header">
+    <div class="company-info">
+      <h3 class="job-title">{{ job.title }}</h3>
+      <div class="company-name">{{ job.companyName }}</div>
+    </div>
+    <div class="job-salary">{{ formatSalary(job.salaryMin, job.salaryMax) }}</div>
+  </div>
+
+  <div class="job-meta">
+    <div class="meta-item">
+      <i class="bi bi-geo-alt"></i> {{ job.location }}
+    </div>
+    <div class="meta-item">
+      <i class="bi bi-briefcase"></i> {{ formatJobType(job.jobType) }}
+    </div>
+    <div class="meta-item">
+      <i class="bi bi-clock"></i> {{ getPostedDate(job.postedDate) }}
+    </div>
+  </div>
+
+  <div class="job-actions">
+    <button class="btn btn-outline-primary job-details-btn" (click)="toggleDetails()">
+      {{ isExpanded ? 'Hide Details' : 'Job Details' }}
+    </button>
+    <button *ngIf="!isRecruiter()" class="btn btn-primary apply-btn" (click)="applyForJob()">Apply Now</button>
+  </div>
+
+  <div class="job-details" *ngIf="isExpanded">
+    <div class="job-description">
+      <h4>Description</h4>
+      <p>{{ job.description }}</p>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <h4>Responsibilities</h4>
+        <p>{{ job.responsibilities }}</p>
+      </div>
+
+      <div class="col-md-6">
+        <h4>Qualifications</h4>
+        <p>{{ job.qualifications }}</p>
+      </div>
+    </div>
+  </div>
+</div>

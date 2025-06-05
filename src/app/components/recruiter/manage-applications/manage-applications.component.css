@@ -1,0 +1,67 @@
+.page-header h2 {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.application-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.application-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  padding: 0.75rem;
+}
+
+.application-table td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+}
+
+.application-table tbody tr {
+  transition: all 0.2s;
+}
+
+.application-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.badge {
+  font-weight: 500;
+  padding: 0.5em 0.75em;
+  border-radius: 4px;
+}
+
+.btn-group .dropdown-toggle {
+  border-radius: 4px;
+}
+
+.dropdown-item {
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.btn-outline-secondary {
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-outline-primary {
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}

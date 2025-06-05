@@ -1,0 +1,36 @@
+.jobs-list {
+  padding: 10px 0;
+}
+
+.total-jobs {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.no-jobs-found {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 40px 20px;
+  text-align: center;
+  margin: 30px 0;
+}
+
+.no-jobs-icon {
+  font-size: 3rem;
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+.no-jobs-found h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.no-jobs-found p {
+  color: #666;
+  max-width: 400px;
+  margin: 0 auto;
+}

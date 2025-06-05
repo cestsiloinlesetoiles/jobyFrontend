@@ -1,0 +1,29 @@
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  font-weight: 600;
+  color: #333;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: #4285F4;
+  border-color: #4285F4;
+}
+
+.btn-primary:hover {
+  background-color: #3367d6;
+  border-color: #3367d6;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f8f9fa;
+  color: #333;
+}

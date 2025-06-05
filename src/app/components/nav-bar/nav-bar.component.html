@@ -1,0 +1,60 @@
+<nav class="navbar">
+  <div class="container">
+    <!-- Brand/Logo -->
+    <a class="Title" href="#">Jobify <span style="font-size: 0.7em; font-weight: normal;">demo</span></a>
+
+    <!-- Navigation links -->
+    <ul class="nav-links">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/home" routerLinkActive="active">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/jobs" routerLinkActive="active">Jobs</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/about" routerLinkActive="active">About</a>
+      </li>
+    </ul>
+
+    <!-- Auth section -->
+    <div class="auth-buttons">
+      <!-- Menu utilisateur connecté -->
+      <div class="user-section" *ngIf="isLoggedIn">
+        <div class="dropdown position-relative">
+          <button class="btn btn-link text-decoration-none dropdown-toggle"
+                  type="button"
+                  (click)="toggleProfileMenu()"
+                  [attr.aria-expanded]="showProfileMenu">
+            {{ userName }}
+          </button>
+
+          <ul class="dropdown-menu dropdown-menu-end position-absolute"
+              [class.show]="showProfileMenu"
+              [style.display]="showProfileMenu ? 'block' : 'none'">
+            <li><a class="dropdown-item" routerLink="/profile" (click)="closeProfileMenu()">My profile</a></li>
+
+            <!-- Options pour utilisateur normal -->
+            <li *ngIf="!isRecruiter"><a class="dropdown-item" routerLink="/applications" (click)="closeProfileMenu()">My applications</a></li>
+
+            <!-- Options pour recruteur -->
+            <li *ngIf="isRecruiter"><a class="dropdown-item" routerLink="/create-job" (click)="closeProfileMenu()">Create Job</a></li>
+            <li *ngIf="isRecruiter"><a class="dropdown-item" routerLink="/manage-jobs" (click)="closeProfileMenu()">Manage Jobs</a></li>
+            <li *ngIf="isRecruiter"><a class="dropdown-item" routerLink="/manage-applications" (click)="closeProfileMenu()">Manage Applications</a></li>
+          </ul>
+        </div>
+        
+        <!-- Bouton rouge de déconnexion visible -->
+        <button class="btn-logout" (click)="logout()" title="Se déconnecter">
+          <i class="fas fa-sign-out-alt"></i> Déconnecter
+        </button>
+      </div>
+
+      <!-- Boutons de connexion pour utilisateur non connecté -->
+      <div class="login-buttons" *ngIf="!isLoggedIn">
+        <a class="btn btn-outline-primary me-2" routerLink="/login">Log in</a>
+        <a class="btn btn-primary" routerLink="/register">Sign up</a>
+      </div>
+
+    </div>
+  </div>
+</nav>

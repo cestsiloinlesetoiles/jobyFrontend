@@ -1,0 +1,79 @@
+<div class="container mt-5">
+  <div class="page-header mb-4">
+    <h2>Manage Applications</h2>
+    <p class="text-muted">View and manage all applications submitted for your job postings</p>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading applications...</p>
+  </div>
+
+  <div *ngIf="error && !isLoading" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!isLoading && !error">
+    <div *ngIf="applications.length === 0" class="text-center my-5">
+      <i class="bi bi-inbox text-muted display-1"></i>
+      <h3 class="mt-3">No applications yet</h3>
+      <p class="text-muted">Applications submitted to your job postings will appear here</p>
+    </div>
+
+    <div *ngIf="applications.length > 0">
+    
+
+      <div class="table-responsive">
+        <table class="table table-hover application-table">
+          <thead>
+            <tr>
+              <th>Applicant</th>
+              <th>Job Position</th>
+              <th>Company</th>
+              <th>Applied Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let app of applications">
+              <td>{{ app.applicantName }}</td>
+              <td>{{ app.jobTitle }}</td>
+              <td>{{ app.companyName }}</td>
+              <td>{{ app.appliedDate | date:'mediumDate' }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-secondary': app.status === applicationStatus.PENDING,
+                  'bg-info': app.status === applicationStatus.REVIEWING,
+                  'bg-success': app.status === applicationStatus.ACCEPTED,
+                  'bg-danger': app.status === applicationStatus.REJECTED,
+                  'bg-primary': app.status === applicationStatus.APPLIED
+                }">
+                  {{ app.status }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Change Status
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" (click)="updateApplicationStatus(app.id, applicationStatus.PENDING)">Pending</a></li>
+                    <li><a class="dropdown-item" (click)="updateApplicationStatus(app.id, applicationStatus.REVIEWING)">Reviewing</a></li>
+                    <li><a class="dropdown-item" (click)="updateApplicationStatus(app.id, applicationStatus.ACCEPTED)">Accepted</a></li>
+                    <li><a class="dropdown-item" (click)="updateApplicationStatus(app.id, applicationStatus.REJECTED)">Rejected</a></li>
+                  </ul>
+                </div>
+                <a [routerLink]="['/application-details', app.id]" class="btn btn-sm btn-outline-primary ms-2">
+                  View Details
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

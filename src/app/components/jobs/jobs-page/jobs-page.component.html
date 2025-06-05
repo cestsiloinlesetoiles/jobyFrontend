@@ -1,0 +1,9 @@
+<div class="container mt-4">
+  <h2>Find Your Dream Job</h2>
+
+  <app-jobs-search (searchFilters)="onSearchFilters($event)"></app-jobs-search>
+
+  <div class="mt-4">
+    <app-jobs-list [jobs]="filteredJobs"></app-jobs-list>
+  </div>
+</div>
