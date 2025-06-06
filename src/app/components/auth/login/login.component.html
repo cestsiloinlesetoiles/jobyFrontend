@@ -1,4 +1,4 @@
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
   <div class="row justify-content-center">
     <div class="col-md-8 col-lg-5">
       <div class="card shadow">
@@ -6,6 +6,10 @@
           <h4>Connexion</h4>
         </div>
         <div class="card-body">
+          <div *ngIf="successMessage" class="alert alert-success">
+            {{ successMessage }}
+          </div>
+
           <!-- Bouton pour afficher les profils de démonstration -->
           <div class="d-grid mb-3">
             <button type="button" class="btn btn-outline-info" (click)="toggleDemoProfiles()">

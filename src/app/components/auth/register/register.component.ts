@@ -66,9 +66,12 @@ export class RegisterComponent {
       role: formValue.role
     };
 
-    this.authHelper.register(user, '/login').subscribe({
+    this.authHelper.register(user).subscribe({
       next: (response) => {
         this.isSubmitting = false;
+        this.router.navigate(['/login'], { 
+          queryParams: { registered: 'true' } 
+        });
       },
       error: (error: any) => {
         this.isSubmitting = false;

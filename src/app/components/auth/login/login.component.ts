@@ -15,6 +15,7 @@ export class LoginComponent {
   loginForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
+  successMessage = '';
   returnUrl: string = '/profile';
   showDemoProfiles = false;
 
@@ -68,10 +69,13 @@ export class LoginComponent {
       password: ['', [Validators.required]]
     });
 
-    // Get return url from route parameters or default to '/profile'
-    this.route.queryParams.subscribe(params => {
-      this.returnUrl = params['returnUrl'] || '/profile';
-    });
+    // Check for return URL
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/profile';
+
+    // Check if user just registered
+    if (this.route.snapshot.queryParams['registered'] === 'true') {
+      this.successMessage = 'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.';
+    }
   }
 
   selectProfile(profile: any) {
