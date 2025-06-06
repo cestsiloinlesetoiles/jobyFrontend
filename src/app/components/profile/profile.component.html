@@ -231,8 +231,8 @@
                   <div class="stats-container">
                     <div class="stat-card">
                       <i class="bi bi-file-earmark-text-fill"></i>
-                      <h3>{{ activeJobsCount }}</h3>
-                      <p>Active Jobs</p>
+                      <h3>{{ recruiterJobs.length }}</h3>
+                      <p>Total Jobs Posted</p>
                     </div>
                     <div class="stat-card">
                       <i class="bi bi-people-fill"></i>
@@ -243,11 +243,6 @@
                         </div>
                       </ng-template>
                       <p>Total Applications</p>
-                    </div>
-                    <div class="stat-card">
-                      <i class="bi bi-archive-fill"></i>
-                      <h3>{{ recruiterJobs.length }}</h3>
-                      <p>Total Jobs Posted</p>
                     </div>
                   </div>
                 </div>
@@ -261,42 +256,19 @@
                       <thead>
                         <tr>
                           <th>Job Title</th>
+                          <th>Company</th>
                           <th>Location</th>
-                          <th>Applications</th>
-                          <th>Active</th>
+                          <th>Type</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr *ngFor="let job of recruiterJobs.slice(0, 5)">
+                        <tr *ngFor="let job of recruiterJobs">
                           <td>{{ job.title }}</td>
+                          <td>{{ job.companyName }}</td>
                           <td>{{ job.location }}</td>
                           <td>
-                            <span *ngIf="job.applicationCount !== undefined; else loadingCount">
-                              {{ job.applicationCount || 0 }}
-                            </span>
-                            <ng-template #loadingCount>
-                              <div class="spinner-border spinner-border-sm text-secondary" role="status" style="width: 1rem; height: 1rem;">
-                                <span class="visually-hidden">Loading...</span>
-                              </div>
-                            </ng-template>
-                          </td>
-                          <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                              <input 
-                                class="form-check-input" 
-                                type="checkbox" 
-                                role="switch"
-                                [checked]="job.isActive"
-                                [id]="'jobSwitch' + job.id"
-                                (change)="toggleJobStatus(job)">
-                              <label 
-                                class="form-check-label ms-2" 
-                                [for]="'jobSwitch' + job.id"
-                                [ngClass]="job.isActive ? 'text-success' : 'text-secondary'">
-                                {{ job.isActive ? 'Active' : 'Inactive' }}
-                              </label>
-                            </div>
+                            <span class="badge bg-primary">{{ job.jobType }}</span>
                           </td>
                           <td>
                             <a [routerLink]="['/edit-job', job.id]" class="btn btn-sm btn-outline-primary">Edit</a>

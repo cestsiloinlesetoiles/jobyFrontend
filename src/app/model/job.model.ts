@@ -33,7 +33,6 @@ export interface Job {
     createdAt?: Date;
     recruiterId?: string;
     applicationCount?: number;
-    isActive?: boolean;
 }
 
 
@@ -52,7 +51,6 @@ export interface JobDTO {
     companyName: string;
     recruiterId?: string;
     applicationCount?: number;
-    isActive?: boolean;
 }
 
 export interface JobRequestDTO {

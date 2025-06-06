@@ -9,6 +9,7 @@ import { filter } from 'rxjs/operators';
 import { JobService } from '../../services/job.service';
 import { Job, JobDTO, JobRequestDTO } from '../../model/job.model';
 import { JobApplicationService } from '../../services/job-application.service';
+import { JobApplication } from '../../model/job-application.model';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -35,7 +36,7 @@ export class ProfileComponent implements OnInit {
   // Data spécifique aux recruteurs
   recruiterJobs: JobDTO[] = [];
   totalApplications: number | null = null;
-  activeJobsCount = 0;
+  isLoadingStats: boolean = false;
 
   // Data spécifique aux admins
   totalUsers = 0;
@@ -44,7 +45,6 @@ export class ProfileComponent implements OnInit {
 
   isEditing = false;
   isLoading = false;
-  isLoadingStats = false;
   errorMessage = '';
   UserRole = UserRole; // Pour l'utiliser dans le template
 
@@ -87,7 +87,6 @@ export class ProfileComponent implements OnInit {
     };
     this.recruiterJobs = [];
     this.totalApplications = null;
-    this.activeJobsCount = 0;
   }
 
   loadUserProfile(): void {
@@ -125,67 +124,54 @@ export class ProfileComponent implements OnInit {
   }
 
   loadRecruiterData(): void {
-    // Charger les jobs du recruteur
     if (this.user.id) {
       this.isLoadingStats = true;
+      
+      // Load jobs
       this.jobService.getJobsByRecruiterId(this.user.id).subscribe({
-        next: (jobs: JobDTO[]) => {
+        next: (jobs) => {
           this.recruiterJobs = jobs;
+          console.log('Loaded recruiter jobs:', this.recruiterJobs.length);
           
-          if (jobs.length === 0) {
-            // Pas de jobs, pas besoin de charger les candidatures
-            this.activeJobsCount = 0;
-            this.totalApplications = 0;
-            this.isLoadingStats = false;
-            return;
-          }
-          
-          // Pour chaque job, récupérer le nombre de candidatures
-          const applicationCountObservables = this.recruiterJobs.map((job) => {
+          // Get application counts for each job
+          const applicationObservables = this.recruiterJobs.map(job => {
             if (job.id) {
-              // Essayer d'abord avec l'endpoint count, sinon compter les candidatures
-              return this.jobApplicationService.getApplicationCountByJob(job.id).pipe(
-                catchError(() => {
-                  // Si l'endpoint count n'existe pas, récupérer toutes les candidatures et les compter
-                  return this.jobApplicationService.getJobApplications(job.id!).pipe(
-                    map(applications => applications.length),
-                    catchError(() => of(0))
-                  );
-                })
+              return this.jobApplicationService.getJobApplications(job.id).pipe(
+                map(applications => ({ jobId: job.id, count: applications.length })),
+                catchError(() => of({ jobId: job.id, count: 0 }))
               );
             }
-            return of(0);
+            return of({ jobId: job.id, count: 0 });
           });
 
-          // Attendre que toutes les requêtes soient terminées
-          forkJoin(applicationCountObservables).subscribe({
-            next: (counts: number[]) => {
-              // Assigner le nombre de candidatures à chaque job
-              counts.forEach((count, index) => {
-                this.recruiterJobs[index].applicationCount = count;
-              });
-
-              // Calculer le nombre de jobs actifs
-              this.activeJobsCount = this.recruiterJobs.filter((job: JobDTO) => job.isActive !== false).length;
-              
-              // Calculer le nombre total de candidatures
-              this.totalApplications = this.recruiterJobs.reduce((total: number, job: JobDTO) => {
-                return total + (job.applicationCount || 0);
-              }, 0);
-              
-              this.isLoadingStats = false;
-            },
-            error: (error) => {
-              console.error('Error loading application counts:', error);
-              // En cas d'erreur, utiliser des valeurs par défaut
-              this.activeJobsCount = this.recruiterJobs.filter((job: JobDTO) => job.isActive !== false).length;
-              this.totalApplications = 0;
-              this.isLoadingStats = false;
-            }
-          });
+          if (applicationObservables.length > 0) {
+            forkJoin(applicationObservables).subscribe({
+              next: (results) => {
+                let total = 0;
+                results.forEach(result => {
+                  const job = this.recruiterJobs.find(j => j.id === result.jobId);
+                  if (job) {
+                    job.applicationCount = result.count;
+                    total += result.count;
+                  }
+                });
+                this.totalApplications = total;
+                this.isLoadingStats = false;
+              },
+              error: (error) => {
+                console.error('Error loading application counts:', error);
+                this.totalApplications = 0;
+                this.isLoadingStats = false;
+              }
+            });
+          } else {
+            this.totalApplications = 0;
+            this.isLoadingStats = false;
+          }
         },
-        error: (error: any) => {
+        error: (error) => {
           console.error('Error loading recruiter jobs:', error);
+          this.errorMessage = 'Failed to load jobs';
           this.isLoadingStats = false;
         }
       });
@@ -287,57 +273,6 @@ export class ProfileComponent implements OnInit {
           console.error('Error updating profile:', error);
           this.errorMessage = 'Error updating profile. Please try again.';
           this.isLoading = false;
-        }
-      });
-    }
-  }
-
-  toggleJobStatus(job: JobDTO): void {
-    // Inverser le statut
-    const newStatus = !job.isActive;
-    const originalStatus = job.isActive;
-    
-    // Mettre à jour temporairement l'UI pour une meilleure UX
-    job.isActive = newStatus;
-    
-    // Mettre à jour le compteur immédiatement
-    if (newStatus) {
-      this.activeJobsCount++;
-    } else {
-      this.activeJobsCount--;
-    }
-
-    // Appeler le service pour mettre à jour le job
-    if (job.id) {
-      this.jobService.updateJobStatus(job.id, newStatus).subscribe({
-        next: (updatedJob) => {
-          // Mise à jour confirmée
-          const index = this.recruiterJobs.findIndex(j => j.id === job.id);
-          if (index !== -1) {
-            this.recruiterJobs[index] = updatedJob;
-            // Recalculer le nombre de jobs actifs pour être sûr
-            this.activeJobsCount = this.recruiterJobs.filter((j: JobDTO) => j.isActive === true).length;
-          }
-          console.log(`Job "${job.title}" is now ${newStatus ? 'active' : 'inactive'}`);
-        },
-        error: (error) => {
-          console.error('Error updating job status:', error);
-          this.errorMessage = 'Error updating job status. Please try again.';
-          
-          // Reverser le changement en cas d'erreur
-          job.isActive = originalStatus;
-          
-          // Reverser le compteur
-          if (originalStatus) {
-            this.activeJobsCount++;
-          } else {
-            this.activeJobsCount--;
-          }
-          
-          const index = this.recruiterJobs.findIndex(j => j.id === job.id);
-          if (index !== -1) {
-            this.recruiterJobs[index].isActive = originalStatus;
-          }
         }
       });
     }

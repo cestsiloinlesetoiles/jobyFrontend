@@ -100,10 +100,4 @@ export class JobService {
       catchError(this.errorService.handleError)
     );
   }
-
-  updateJobStatus(id: string, isActive: boolean): Observable<JobDTO> {
-    return this.http.patch<JobDTO>(`${this.apiUrl}/${id}/status`, { isActive }).pipe(
-      catchError(this.errorService.handleError)
-    );
-  }
 }
